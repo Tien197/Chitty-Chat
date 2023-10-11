@@ -4,18 +4,17 @@ package proto;
 
 option go_package = "github.com/Tien197/Chitty-Chat/proto";
 // when changing the file
-// run: protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/proto.proto
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/proto.proto
 
-service Template
-{
-  rpc SayHi (Greeting) returns (Farewell);
+message AskForTimeMessage {
+  int64 clientId = 1;
 }
 
-message Greeting {
-  string clientName = 1;
-  string message = 2;
+message TimeMessage {
+  string serverName = 1;
+  string time = 2;
 }
 
-message Farewell {
-  string message = 1;
+service TimeAsk {
+  rpc AskForTime(AskForTimeMessage) returns (TimeMessage);
 }
