@@ -11,7 +11,7 @@ message AskForTimeMessage {
 }
 
 message TimeMessage {
-  string serverName = 1;
+  string serverName = 1; // don't need server name
   string time = 2;
 }
 

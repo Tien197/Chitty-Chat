@@ -27,7 +27,7 @@ func main() {
 
 	// Create a server struct
 	server := &Server{
-		name: "serverName",
+		name: "Chitty-Chat",
 		port: *port,
 	}
 
@@ -62,7 +62,7 @@ func startServer(server *Server) {
 }
 
 func (c *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
-	log.Printf("Client with ID %d asked for the time\n", in.ClientId)
+	log.Printf("Participant %d sends message: at Lamport time ... \n", in.ClientId)
 	return &proto.TimeMessage{
 		Time:       time.Now().String(),
 		ServerName: c.name,
