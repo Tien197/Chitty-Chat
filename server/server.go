@@ -73,7 +73,7 @@ func startServer(server *Server) {
 				log.Printf("Server failed to accept connection: %v", err)
 				continue
 			}
-			log.Printf("Client {id} joined %s at Lamport Time ... ", server.name)
+			log.Printf("Participant {id} joined %s at Lamport Time ... ", server.name)
 		}
 	}()
 
@@ -82,8 +82,6 @@ func startServer(server *Server) {
 		log.Fatalf("Could not serve listener")
 	}
 }
-
-// client joins server
 
 func (c *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
 	log.Printf("Participant %d sends message: at Lamport time ... \n", in.ClientId)

@@ -16,9 +16,9 @@ import (
 )
 
 type Client struct {
-	id          int
-	portNumber  int
-	lamportTime int
+	id         int
+	portNumber int
+	//lamportTime int
 }
 
 var (
@@ -33,9 +33,9 @@ func main() {
 
 	// Create a client
 	client := &Client{
-		id:          *clientID,
-		portNumber:  *clientPort,
-		lamportTime: 1,
+		id:         *clientID,
+		portNumber: *clientPort,
+		//lamportTime: 1,
 	}
 
 	// Wait for the client (user) to ask for the time
@@ -85,14 +85,7 @@ func connectToServer(client *Client) (proto.TimeAskClient, error) {
 	if err != nil {
 		log.Fatalf("Could not connect to port %d", *serverPort)
 	} else {
-		log.Printf("Client %d connected to the server at port %d at Lamport Time %d \n", client.id, *serverPort, client.lamportTime)
+		log.Printf("Client %d connected to the server at port %d\n", client.id, *serverPort)
 	}
 	return proto.NewTimeAskClient(conn), nil
 }
-
-/*func (c *Client) ClientRequestToJoin(ctx context.Context, in *proto.TimeMessage) (*proto.AskForTimeMessage, error) {
-	log.Printf("Client %d requested to join %s at Lamport time %d \n", c.id, in.ServerName, c.lamportTime+1)
-	return &proto.AskForTimeMessage{
-		ClientId: int64(c.id),
-	}, nil
-}*/
