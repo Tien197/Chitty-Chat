@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
-	"time"
 )
 
 // Struct that will be used to represent the Server.
@@ -84,9 +83,8 @@ func startServer(server *Server) {
 }
 
 func (c *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
-	log.Printf("Participant %d sends message: at Lamport time ... \n", in.ClientId)
+	log.Printf("Participant %d sends message: \"%s\" at Lamport time ... \n", in.ClientId, in.Message)
 	return &proto.TimeMessage{
-		Time:       time.Now().String(),
 		ServerName: c.name,
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/Tien197/Chitty-Chat/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"os"
 	"os/signal"
@@ -69,12 +70,13 @@ func waitForTimeRequest(client *Client) {
 		// Ask the server for the time
 		timeReturnMessage, err := serverConnection.AskForTime(context.Background(), &proto.AskForTimeMessage{
 			ClientId: int64(client.id),
+			Message:  input,
 		})
 
 		if err != nil {
 			log.Printf(err.Error())
 		} else {
-			log.Printf("%s broadcasts client {id}'s {message} at Lamport Time ... %s\n", timeReturnMessage.ServerName, timeReturnMessage.Time)
+			log.Printf("%s broadcasts client {id}'s \"%s\" at Lamport Time ...\n", timeReturnMessage.ServerName, input)
 		}
 	}
 }
@@ -88,4 +90,13 @@ func connectToServer(client *Client) (proto.TimeAskClient, error) {
 		log.Printf("Client %d connected to the server at port %d\n", client.id, *serverPort)
 	}
 	return proto.NewTimeAskClient(conn), nil
+}
+
+func (client *Client) clientRequestsToJoin(ctx context.Context, in *proto.AskForTimeMessage) (*emptypb.Empty, error) {
+
+	//client.LamportTime++
+
+	log.Printf("Client #%d joined at lamport timestamp %d \n", in.ClientId /*client.LamportTime*/)
+
+	return &emptypb.Empty{}, nil
 }
