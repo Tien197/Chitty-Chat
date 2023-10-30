@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TimeAsk_AskForTime_FullMethodName = "/proto.TimeAsk/AskForTime"
+	TimeAsk_AskForTime_FullMethodName        = "/proto.TimeAsk/AskForTime"
+	TimeAsk_ClientJoinsServer_FullMethodName = "/proto.TimeAsk/ClientJoinsServer"
 )
 
 // TimeAskClient is the client API for TimeAsk service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TimeAskClient interface {
 	AskForTime(ctx context.Context, in *AskForTimeMessage, opts ...grpc.CallOption) (*TimeMessage, error)
+	ClientJoinsServer(ctx context.Context, in *AskForTimeMessage, opts ...grpc.CallOption) (*TimeMessage, error)
 }
 
 type timeAskClient struct {
@@ -46,11 +48,21 @@ func (c *timeAskClient) AskForTime(ctx context.Context, in *AskForTimeMessage, o
 	return out, nil
 }
 
+func (c *timeAskClient) ClientJoinsServer(ctx context.Context, in *AskForTimeMessage, opts ...grpc.CallOption) (*TimeMessage, error) {
+	out := new(TimeMessage)
+	err := c.cc.Invoke(ctx, TimeAsk_ClientJoinsServer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TimeAskServer is the server API for TimeAsk service.
 // All implementations must embed UnimplementedTimeAskServer
 // for forward compatibility
 type TimeAskServer interface {
 	AskForTime(context.Context, *AskForTimeMessage) (*TimeMessage, error)
+	ClientJoinsServer(context.Context, *AskForTimeMessage) (*TimeMessage, error)
 	mustEmbedUnimplementedTimeAskServer()
 }
 
@@ -60,6 +72,9 @@ type UnimplementedTimeAskServer struct {
 
 func (UnimplementedTimeAskServer) AskForTime(context.Context, *AskForTimeMessage) (*TimeMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AskForTime not implemented")
+}
+func (UnimplementedTimeAskServer) ClientJoinsServer(context.Context, *AskForTimeMessage) (*TimeMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClientJoinsServer not implemented")
 }
 func (UnimplementedTimeAskServer) mustEmbedUnimplementedTimeAskServer() {}
 
@@ -92,6 +107,24 @@ func _TimeAsk_AskForTime_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TimeAsk_ClientJoinsServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AskForTimeMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TimeAskServer).ClientJoinsServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TimeAsk_ClientJoinsServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TimeAskServer).ClientJoinsServer(ctx, req.(*AskForTimeMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TimeAsk_ServiceDesc is the grpc.ServiceDesc for TimeAsk service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +135,10 @@ var TimeAsk_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AskForTime",
 			Handler:    _TimeAsk_AskForTime_Handler,
+		},
+		{
+			MethodName: "ClientJoinsServer",
+			Handler:    _TimeAsk_ClientJoinsServer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

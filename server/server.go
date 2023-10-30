@@ -64,37 +64,26 @@ func startServer(server *Server) {
 	// Register the grpc server and serve its listener
 	proto.RegisterTimeAskServer(grpcServer, server)
 
-	// message sent to server terminal when client joins
-	go func() { // should probably be refactored to get Lamport Time from client
-		for {
-			_, err := listener.Accept()
-			if err != nil {
-				log.Printf("Server failed to accept connection: %v", err)
-				continue
-			}
-			log.Printf("Participant {id} joined %s at Lamport Time ... ", server.name)
-		}
-	}()
-
 	serveError := grpcServer.Serve(listener)
 	if serveError != nil {
 		log.Fatalf("Could not serve listener")
 	}
 }
 
-func (c *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
+func (s *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
 	log.Printf("Participant %d sends message: \"%s\" at Lamport time ... \n", in.ClientId, in.Message)
 	return &proto.TimeMessage{
-		ServerName: c.name,
+		ServerName: s.name,
 	}, nil
 }
 
 // when client joins server
-/*
-func (c *Server) ClientJoinsServer(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
-	log.Printf("Client %d joins %s at Lamport time ... \n", in.ClientId, c.name)
+func (s *Server) ClientJoinsServer(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
+	// updates lamport time depending on client
+	in.LamportTime++
+
+	log.Printf("Client %d joins %s at Lamport time %d \n", in.ClientId, s.name, in.LamportTime)
 	return &proto.TimeMessage{
-		Time:       time.Now().String(),
-		ServerName: c.name,
+		ServerName: s.name,
 	}, nil
-}*/
+}

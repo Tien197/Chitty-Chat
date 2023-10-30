@@ -7,7 +7,6 @@ import (
 	"github.com/Tien197/Chitty-Chat/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"os"
 	"os/signal"
@@ -17,9 +16,9 @@ import (
 )
 
 type Client struct {
-	id         int
-	portNumber int
-	//lamportTime int
+	id          int
+	portNumber  int
+	lamportTime int
 }
 
 var (
@@ -34,9 +33,9 @@ func main() {
 
 	// Create a client
 	client := &Client{
-		id:         *clientID,
-		portNumber: *clientPort,
-		//lamportTime: 1,
+		id:          *clientID,
+		portNumber:  *clientPort,
+		lamportTime: 1,
 	}
 
 	// Wait for the client (user) to ask for the time
@@ -55,6 +54,14 @@ func main() {
 func waitForTimeRequest(client *Client) {
 	// Connect to the server
 	serverConnection, _ := connectToServer(client)
+
+	client.lamportTime++
+	log.Printf("Client %d requests to join server at Lamport Time %d", client.id, client.lamportTime)
+
+	serverConnection.ClientJoinsServer(context.Background(), &proto.AskForTimeMessage{
+		ClientId:    int64(client.id),
+		LamportTime: int64(client.lamportTime),
+	})
 
 	// Wait for input in the client terminal
 	scanner := bufio.NewScanner(os.Stdin)
@@ -87,16 +94,7 @@ func connectToServer(client *Client) (proto.TimeAskClient, error) {
 	if err != nil {
 		log.Fatalf("Could not connect to port %d", *serverPort)
 	} else {
-		log.Printf("Client %d connected to the server at port %d\n", client.id, *serverPort)
+		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
 	}
 	return proto.NewTimeAskClient(conn), nil
-}
-
-func (client *Client) clientRequestsToJoin(ctx context.Context, in *proto.AskForTimeMessage) (*emptypb.Empty, error) {
-
-	//client.LamportTime++
-
-	log.Printf("Client #%d joined at lamport timestamp %d \n", in.ClientId /*client.LamportTime*/)
-
-	return &emptypb.Empty{}, nil
 }

@@ -20,11 +20,8 @@ message TimeMessage { // server
 
 service TimeAsk { // client sends message to server
   rpc AskForTime(AskForTimeMessage) returns (TimeMessage);
+  rpc ClientJoinsServer(AskForTimeMessage) returns (TimeMessage);
 }
-
-/*service ClientRequest { // client sends message to server when they join
-  rpc ClientRequestToJoin(TimeMessage) returns (AskForTimeMessage);
-}*/
 
 /*service Join { // server sends message to all clients when a client joins
   rpc ClientJoins(TimeMessage) returns (AskForTimeMessage);
