@@ -6,15 +6,26 @@ option go_package = "github.com/Tien197/Chitty-Chat/proto";
 // when changing the file
 // protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/proto.proto
 
-message AskForTimeMessage {
+message AskForTimeMessage { // client
   int64 clientId = 1;
+  int64 lamportTime = 2;
 }
 
-message TimeMessage {
-  string serverName = 1; // don't need server name
-  string time = 2;
+message TimeMessage { // server
+  string serverName = 1;
+  string lamportTime = 2;
 }
 
-service TimeAsk {
+service TimeAsk { // client sends message to server
   rpc AskForTime(AskForTimeMessage) returns (TimeMessage);
 }
+
+service ClientRequest { // client sends message to server when they join
+  rpc ClientRequestToJoin(TimeMessage) returns (AskForTimeMessage);
+}
+
+/*service Join { // server sends message to all clients when a client joins
+  rpc ClientJoins(TimeMessage) returns (AskForTimeMessage);
+}*/
+
+
