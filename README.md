@@ -4,6 +4,17 @@ Distributed Systems (B-SWU & K-SD, Autumn 2023)
 * Mandatory Hand-in 3 - Chitty Chat
 * Submision Due Date: *`Tuesday 31, October 2023, 23:59`*
 
+## How to run
+Server has to run first in its own terminal, running in the root of the project.
+```bash
+go run server/server.go -port 5454
+```
+
+The clients are run in their own terminal as well. The id for the client can be changed.
+```bash
+go run client/client.go -cPort 8080 -sPort 5454 -id 1
+```
+
 ## Authors
 * Kasper Kirkegaard Nielsen (kkni@itu.dk)
 * Omar Lukman Semou (omse@itu.dk)
