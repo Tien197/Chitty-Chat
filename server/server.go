@@ -95,15 +95,17 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	s.participants = append(s.participants, int(in.ClientId))
 
 	// need to be broadcast to all existing participants
-	for range s.participants {
-		//clientConn, _ := connectToClient(int(in.PortNumber))
+	for _, id := range s.participants {
+		clientConn, _ := connectToClient(int(in.PortNumber))
 
 		s.lamportTime++
-		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
+		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, id, s.lamportTime)
 
-		// Send a message to the participant with participantId
-		// You need to implement the message sending logic here
-		// Example: sendMessage(in.ClientId, participantId, "Join message")
+		// send join message to participant
+		_, _ = clientConn.ClientJoinReturn(context.Background(), &proto.ServerInfo{ // doesn't work
+			LamportTime: int64(s.lamportTime),
+		})
+
 	}
 
 	return &proto.ServerInfo{

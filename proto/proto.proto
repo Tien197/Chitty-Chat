@@ -23,7 +23,9 @@ message ServerInfo { // server
 service ClientToServer { // client sends message to server
   rpc ParticipantMessages(ClientInfo) returns (ServerInfo);
   rpc ParticipantJoins(ClientInfo) returns (ServerInfo);
+  rpc ClientJoinReturn(ServerInfo) returns (ClientInfo);
 }
+
 
 /*service Join { // server sends message to all clients when a client joins
   rpc ClientJoins(TimeMessage) returns (AskForTimeMessage);

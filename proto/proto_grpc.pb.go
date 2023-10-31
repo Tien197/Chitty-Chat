@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	ClientToServer_ParticipantMessages_FullMethodName = "/proto.ClientToServer/ParticipantMessages"
 	ClientToServer_ParticipantJoins_FullMethodName    = "/proto.ClientToServer/ParticipantJoins"
+	ClientToServer_ClientJoinReturn_FullMethodName    = "/proto.ClientToServer/ClientJoinReturn"
 )
 
 // ClientToServerClient is the client API for ClientToServer service.
@@ -29,6 +30,7 @@ const (
 type ClientToServerClient interface {
 	ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 	ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
+	ClientJoinReturn(ctx context.Context, in *ServerInfo, opts ...grpc.CallOption) (*ClientInfo, error)
 }
 
 type clientToServerClient struct {
@@ -57,12 +59,22 @@ func (c *clientToServerClient) ParticipantJoins(ctx context.Context, in *ClientI
 	return out, nil
 }
 
+func (c *clientToServerClient) ClientJoinReturn(ctx context.Context, in *ServerInfo, opts ...grpc.CallOption) (*ClientInfo, error) {
+	out := new(ClientInfo)
+	err := c.cc.Invoke(ctx, ClientToServer_ClientJoinReturn_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClientToServerServer is the server API for ClientToServer service.
 // All implementations must embed UnimplementedClientToServerServer
 // for forward compatibility
 type ClientToServerServer interface {
 	ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error)
 	ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error)
+	ClientJoinReturn(context.Context, *ServerInfo) (*ClientInfo, error)
 	mustEmbedUnimplementedClientToServerServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedClientToServerServer) ParticipantMessages(context.Context, *C
 }
 func (UnimplementedClientToServerServer) ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParticipantJoins not implemented")
+}
+func (UnimplementedClientToServerServer) ClientJoinReturn(context.Context, *ServerInfo) (*ClientInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClientJoinReturn not implemented")
 }
 func (UnimplementedClientToServerServer) mustEmbedUnimplementedClientToServerServer() {}
 
@@ -125,6 +140,24 @@ func _ClientToServer_ParticipantJoins_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClientToServer_ClientJoinReturn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServerInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientToServerServer).ClientJoinReturn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientToServer_ClientJoinReturn_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientToServerServer).ClientJoinReturn(ctx, req.(*ServerInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ClientToServer_ServiceDesc is the grpc.ServiceDesc for ClientToServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var ClientToServer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ParticipantJoins",
 			Handler:    _ClientToServer_ParticipantJoins_Handler,
+		},
+		{
+			MethodName: "ClientJoinReturn",
+			Handler:    _ClientToServer_ClientJoinReturn_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

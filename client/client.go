@@ -66,6 +66,8 @@ func waitForJoinRequest(client *Client) {
 		log.Printf("Client %d could not join server", client.id)
 	}
 
+	//clientJoinReturn
+
 	// Wait for input in the client terminal
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -100,4 +102,18 @@ func connectToServer(client *Client) (proto.ClientToServerClient, error) {
 		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
 	}
 	return proto.NewClientToServerClient(conn), nil
+}
+
+func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ServerInfo) (*proto.ServerInfo, error) {
+
+	if client.lamportTime < int(in.LamportTime) {
+		client.lamportTime = int(in.LamportTime)
+	}
+	client.lamportTime++
+
+	log.Printf("Client %d joined at lamport timestamp %d\n", client.id, client.lamportTime)
+
+	return &proto.ServerInfo{
+		LamportTime: in.LamportTime,
+	}, nil
 }
