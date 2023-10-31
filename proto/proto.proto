@@ -16,11 +16,12 @@ message AskForTimeMessage { // client
 
 message TimeMessage { // server
   string serverName = 1;
+  int64 lamportTime = 2;
 }
 
 service TimeAsk { // client sends message to server
   rpc AskForTime(AskForTimeMessage) returns (TimeMessage);
-  rpc ClientJoinsServer(AskForTimeMessage) returns (TimeMessage);
+  rpc ParticipantJoinsServer(AskForTimeMessage) returns (TimeMessage);
 }
 
 /*service Join { // server sends message to all clients when a client joins

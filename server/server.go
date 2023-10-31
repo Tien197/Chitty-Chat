@@ -59,7 +59,7 @@ func startServer(server *Server) {
 	if err != nil {
 		log.Fatalf("Could not create the server %v", err)
 	}
-	log.Printf("Started server at port: %d at Lamport time %d \n", server.port, server.lamportTime)
+	log.Printf("Started %s at port: %d at Lamport time %d \n", server.name, server.port, server.lamportTime)
 
 	// Register the grpc server and serve its listener
 	proto.RegisterTimeAskServer(grpcServer, server)
@@ -78,12 +78,19 @@ func (s *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*
 }
 
 // when client joins server
-func (s *Server) ClientJoinsServer(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
+func (s *Server) ParticipantJoinsServer(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
 	// updates lamport time depending on client
-	in.LamportTime++
+	if s.lamportTime < int(in.LamportTime) {
+		s.lamportTime = int(in.LamportTime)
+	}
+	s.lamportTime++
+	log.Printf("Participant %d joins %s at Lamport time %d\n", in.ClientId, s.name, s.lamportTime)
 
-	log.Printf("Client %d joins %s at Lamport time %d \n", in.ClientId, s.name, in.LamportTime)
+	// need to be broadcast to all existing participants
+	s.lamportTime++
+	log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
+
 	return &proto.TimeMessage{
-		ServerName: s.name,
+		LamportTime: int64(s.lamportTime),
 	}, nil
 }

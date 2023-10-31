@@ -58,10 +58,13 @@ func waitForTimeRequest(client *Client) {
 	client.lamportTime++
 	log.Printf("Client %d requests to join server at Lamport Time %d", client.id, client.lamportTime)
 
-	serverConnection.ClientJoinsServer(context.Background(), &proto.AskForTimeMessage{
+	_, err := serverConnection.ParticipantJoinsServer(context.Background(), &proto.AskForTimeMessage{
 		ClientId:    int64(client.id),
 		LamportTime: int64(client.lamportTime),
 	})
+	if err != nil {
+		log.Printf("Client %d could not join server", client.id)
+	}
 
 	// Wait for input in the client terminal
 	scanner := bufio.NewScanner(os.Stdin)
