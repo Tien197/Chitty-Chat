@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/Tien197/Chitty-Chat/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
 	"os"
@@ -94,12 +95,28 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	s.participants = append(s.participants, int(in.ClientId))
 
 	// need to be broadcast to all existing participants
-	/*for participantId, participantPort := range s.participants {
+	for range s.participants {
+		//clientConn, _ := connectToClient(int(in.PortNumber))
+
 		s.lamportTime++
 		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
-	}*/
+
+		// Send a message to the participant with participantId
+		// You need to implement the message sending logic here
+		// Example: sendMessage(in.ClientId, participantId, "Join message")
+	}
 
 	return &proto.ServerInfo{
 		LamportTime: int64(s.lamportTime),
 	}, nil
+}
+
+func connectToClient(port int) (proto.ClientToServerClient, error) {
+	// Dial the server at the specified port.
+	conn, err := grpc.Dial("localhost:"+strconv.Itoa(port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Could not connect to port %d", port)
+	}
+
+	return proto.NewClientToServerClient(conn), nil
 }
