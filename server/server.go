@@ -84,7 +84,6 @@ func (s *Server) ParticipantMessages(ctx context.Context, in *proto.ClientInfo) 
 // when participant joins server
 func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
 	// updates lamport time depending on participant
-
 	if s.lamportTime < int(in.LamportTime) {
 		s.lamportTime = int(in.LamportTime)
 	}
@@ -97,15 +96,17 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	// need to be broadcast to all existing participants
 	for _, id := range s.participants {
 		clientConn, _ := connectToClient(int(in.PortNumber))
-
 		s.lamportTime++
 		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, id, s.lamportTime)
 
 		// send join message to participant
-		_, _ = clientConn.ClientJoinReturn(context.Background(), &proto.ServerInfo{ // doesn't work
+		_, err := clientConn.ClientJoinReturn(context.Background(), &proto.ClientInfo{ // doesn't work
+			ClientId:    in.ClientId,
 			LamportTime: int64(s.lamportTime),
 		})
-
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &proto.ServerInfo{
@@ -119,6 +120,5 @@ func connectToClient(port int) (proto.ClientToServerClient, error) {
 	if err != nil {
 		log.Fatalf("Could not connect to port %d", port)
 	}
-
 	return proto.NewClientToServerClient(conn), nil
 }

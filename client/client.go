@@ -16,9 +16,10 @@ import (
 )
 
 type Client struct {
-	id          int
-	portNumber  int
-	lamportTime int
+	proto.UnimplementedClientToServerServer // Necessary
+	id                                      int
+	portNumber                              int
+	lamportTime                             int
 }
 
 var (
@@ -61,12 +62,15 @@ func waitForJoinRequest(client *Client) {
 	_, err := serverConnection.ParticipantJoins(context.Background(), &proto.ClientInfo{
 		ClientId:    int64(client.id),
 		LamportTime: int64(client.lamportTime),
+		PortNumber:  int64(client.portNumber),
 	})
+
 	if err != nil {
 		log.Printf("Client %d could not join server", client.id)
 	}
-
-	//clientJoinReturn
+	if err != nil {
+		log.Printf("Error in ParticipantJoins: %v", err)
+	}
 
 	// Wait for input in the client terminal
 	scanner := bufio.NewScanner(os.Stdin)
@@ -104,7 +108,7 @@ func connectToServer(client *Client) (proto.ClientToServerClient, error) {
 	return proto.NewClientToServerClient(conn), nil
 }
 
-func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ServerInfo) (*proto.ServerInfo, error) {
+func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
 
 	if client.lamportTime < int(in.LamportTime) {
 		client.lamportTime = int(in.LamportTime)
@@ -114,6 +118,6 @@ func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ServerInfo
 	log.Printf("Client %d joined at lamport timestamp %d\n", client.id, client.lamportTime)
 
 	return &proto.ServerInfo{
-		LamportTime: in.LamportTime,
+		LamportTime: int64(client.lamportTime),
 	}, nil
 }

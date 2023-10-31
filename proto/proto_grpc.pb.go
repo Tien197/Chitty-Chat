@@ -30,7 +30,7 @@ const (
 type ClientToServerClient interface {
 	ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 	ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
-	ClientJoinReturn(ctx context.Context, in *ServerInfo, opts ...grpc.CallOption) (*ClientInfo, error)
+	ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 }
 
 type clientToServerClient struct {
@@ -59,8 +59,8 @@ func (c *clientToServerClient) ParticipantJoins(ctx context.Context, in *ClientI
 	return out, nil
 }
 
-func (c *clientToServerClient) ClientJoinReturn(ctx context.Context, in *ServerInfo, opts ...grpc.CallOption) (*ClientInfo, error) {
-	out := new(ClientInfo)
+func (c *clientToServerClient) ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
+	out := new(ServerInfo)
 	err := c.cc.Invoke(ctx, ClientToServer_ClientJoinReturn_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (c *clientToServerClient) ClientJoinReturn(ctx context.Context, in *ServerI
 type ClientToServerServer interface {
 	ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error)
 	ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error)
-	ClientJoinReturn(context.Context, *ServerInfo) (*ClientInfo, error)
+	ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error)
 	mustEmbedUnimplementedClientToServerServer()
 }
 
@@ -88,7 +88,7 @@ func (UnimplementedClientToServerServer) ParticipantMessages(context.Context, *C
 func (UnimplementedClientToServerServer) ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParticipantJoins not implemented")
 }
-func (UnimplementedClientToServerServer) ClientJoinReturn(context.Context, *ServerInfo) (*ClientInfo, error) {
+func (UnimplementedClientToServerServer) ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClientJoinReturn not implemented")
 }
 func (UnimplementedClientToServerServer) mustEmbedUnimplementedClientToServerServer() {}
@@ -141,7 +141,7 @@ func _ClientToServer_ParticipantJoins_Handler(srv interface{}, ctx context.Conte
 }
 
 func _ClientToServer_ClientJoinReturn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServerInfo)
+	in := new(ClientInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func _ClientToServer_ClientJoinReturn_Handler(srv interface{}, ctx context.Conte
 		FullMethod: ClientToServer_ClientJoinReturn_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientToServerServer).ClientJoinReturn(ctx, req.(*ServerInfo))
+		return srv.(ClientToServerServer).ClientJoinReturn(ctx, req.(*ClientInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
