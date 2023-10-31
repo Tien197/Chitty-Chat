@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// Wait for the client (user) to ask for the time
-	go waitForTimeRequest(client)
+	go waitForJoinRequest(client)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGINT)
@@ -51,14 +51,14 @@ func main() {
 
 }
 
-func waitForTimeRequest(client *Client) {
+func waitForJoinRequest(client *Client) {
 	// Connect to the server
 	serverConnection, _ := connectToServer(client)
 
 	client.lamportTime++
 	log.Printf("Client %d requests to join server at Lamport Time %d", client.id, client.lamportTime)
 
-	_, err := serverConnection.ParticipantJoinsServer(context.Background(), &proto.AskForTimeMessage{
+	_, err := serverConnection.ParticipantJoins(context.Background(), &proto.ClientInfo{
 		ClientId:    int64(client.id),
 		LamportTime: int64(client.lamportTime),
 	})
@@ -78,7 +78,7 @@ func waitForTimeRequest(client *Client) {
 		}
 
 		// Ask the server for the time
-		timeReturnMessage, err := serverConnection.AskForTime(context.Background(), &proto.AskForTimeMessage{
+		clientReturnMessage, err := serverConnection.ParticipantMessages(context.Background(), &proto.ClientInfo{
 			ClientId: int64(client.id),
 			Message:  input,
 		})
@@ -86,12 +86,12 @@ func waitForTimeRequest(client *Client) {
 		if err != nil {
 			log.Printf(err.Error())
 		} else {
-			log.Printf("%s broadcasts client {id}'s \"%s\" at Lamport Time ...\n", timeReturnMessage.ServerName, input)
+			log.Printf("%s broadcasts client {id}'s \"%s\" at Lamport Time ...\n", clientReturnMessage.ServerName, input)
 		}
 	}
 }
 
-func connectToServer(client *Client) (proto.TimeAskClient, error) {
+func connectToServer(client *Client) (proto.ClientToServerClient, error) {
 	// Dial the server at the specified port.
 	conn, err := grpc.Dial("localhost:"+strconv.Itoa(*serverPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -99,5 +99,5 @@ func connectToServer(client *Client) (proto.TimeAskClient, error) {
 	} else {
 		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
 	}
-	return proto.NewTimeAskClient(conn), nil
+	return proto.NewClientToServerClient(conn), nil
 }

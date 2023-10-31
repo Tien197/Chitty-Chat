@@ -15,10 +15,11 @@ import (
 
 // Struct that will be used to represent the Server.
 type Server struct {
-	proto.UnimplementedTimeAskServer // Necessary
-	name                             string
-	port                             int
-	lamportTime                      int
+	proto.UnimplementedClientToServerServer // Necessary
+	name                                    string
+	port                                    int
+	lamportTime                             int
+	participants                            []int
 }
 
 // Used to get the user-defined port for the server from the command line
@@ -30,9 +31,10 @@ func main() {
 
 	// Create a server struct
 	server := &Server{
-		name:        "Chitty-Chat",
-		port:        *port,
-		lamportTime: 1,
+		name:         "Chitty-Chat",
+		port:         *port,
+		lamportTime:  1,
+		participants: make([]int, 0),
 	}
 
 	// Start the server
@@ -62,7 +64,7 @@ func startServer(server *Server) {
 	log.Printf("Started %s at port: %d at Lamport time %d \n", server.name, server.port, server.lamportTime)
 
 	// Register the grpc server and serve its listener
-	proto.RegisterTimeAskServer(grpcServer, server)
+	proto.RegisterClientToServerServer(grpcServer, server)
 
 	serveError := grpcServer.Serve(listener)
 	if serveError != nil {
@@ -70,27 +72,34 @@ func startServer(server *Server) {
 	}
 }
 
-func (s *Server) AskForTime(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
+// when participant sends message
+func (s *Server) ParticipantMessages(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
 	log.Printf("Participant %d sends message: \"%s\" at Lamport time ... \n", in.ClientId, in.Message)
-	return &proto.TimeMessage{
+	return &proto.ServerInfo{
 		ServerName: s.name,
 	}, nil
 }
 
-// when client joins server
-func (s *Server) ParticipantJoinsServer(ctx context.Context, in *proto.AskForTimeMessage) (*proto.TimeMessage, error) {
-	// updates lamport time depending on client
+// when participant joins server
+func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
+	// updates lamport time depending on participant
+
 	if s.lamportTime < int(in.LamportTime) {
 		s.lamportTime = int(in.LamportTime)
 	}
 	s.lamportTime++
 	log.Printf("Participant %d joins %s at Lamport time %d\n", in.ClientId, s.name, s.lamportTime)
 
-	// need to be broadcast to all existing participants
-	s.lamportTime++
-	log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
+	// Assuming that all clientIds are unique
+	s.participants = append(s.participants, int(in.ClientId))
 
-	return &proto.TimeMessage{
+	// need to be broadcast to all existing participants
+	/*for participantId, participantPort := range s.participants {
+		s.lamportTime++
+		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
+	}*/
+
+	return &proto.ServerInfo{
 		LamportTime: int64(s.lamportTime),
 	}, nil
 }
