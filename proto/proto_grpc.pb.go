@@ -19,163 +19,216 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ClientToServer_ParticipantMessages_FullMethodName = "/proto.ClientToServer/ParticipantMessages"
-	ClientToServer_ParticipantJoins_FullMethodName    = "/proto.ClientToServer/ParticipantJoins"
-	ClientToServer_ClientJoinReturn_FullMethodName    = "/proto.ClientToServer/ClientJoinReturn"
+	CCService_ParticipantMessages_FullMethodName = "/proto.CCService/ParticipantMessages"
+	CCService_ParticipantJoins_FullMethodName    = "/proto.CCService/ParticipantJoins"
 )
 
-// ClientToServerClient is the client API for ClientToServer service.
+// CCServiceClient is the client API for CCService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ClientToServerClient interface {
+type CCServiceClient interface {
 	ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 	ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
-	ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 }
 
-type clientToServerClient struct {
+type cCServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewClientToServerClient(cc grpc.ClientConnInterface) ClientToServerClient {
-	return &clientToServerClient{cc}
+func NewCCServiceClient(cc grpc.ClientConnInterface) CCServiceClient {
+	return &cCServiceClient{cc}
 }
 
-func (c *clientToServerClient) ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
+func (c *cCServiceClient) ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
 	out := new(ServerInfo)
-	err := c.cc.Invoke(ctx, ClientToServer_ParticipantMessages_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, CCService_ParticipantMessages_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *clientToServerClient) ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
+func (c *cCServiceClient) ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
 	out := new(ServerInfo)
-	err := c.cc.Invoke(ctx, ClientToServer_ParticipantJoins_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, CCService_ParticipantJoins_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *clientToServerClient) ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
-	out := new(ServerInfo)
-	err := c.cc.Invoke(ctx, ClientToServer_ClientJoinReturn_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ClientToServerServer is the server API for ClientToServer service.
-// All implementations must embed UnimplementedClientToServerServer
+// CCServiceServer is the server API for CCService service.
+// All implementations must embed UnimplementedCCServiceServer
 // for forward compatibility
-type ClientToServerServer interface {
+type CCServiceServer interface {
 	ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error)
 	ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error)
-	ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error)
-	mustEmbedUnimplementedClientToServerServer()
+	mustEmbedUnimplementedCCServiceServer()
 }
 
-// UnimplementedClientToServerServer must be embedded to have forward compatible implementations.
-type UnimplementedClientToServerServer struct {
+// UnimplementedCCServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCCServiceServer struct {
 }
 
-func (UnimplementedClientToServerServer) ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error) {
+func (UnimplementedCCServiceServer) ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParticipantMessages not implemented")
 }
-func (UnimplementedClientToServerServer) ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error) {
+func (UnimplementedCCServiceServer) ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParticipantJoins not implemented")
 }
-func (UnimplementedClientToServerServer) ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClientJoinReturn not implemented")
-}
-func (UnimplementedClientToServerServer) mustEmbedUnimplementedClientToServerServer() {}
+func (UnimplementedCCServiceServer) mustEmbedUnimplementedCCServiceServer() {}
 
-// UnsafeClientToServerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ClientToServerServer will
+// UnsafeCCServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CCServiceServer will
 // result in compilation errors.
-type UnsafeClientToServerServer interface {
-	mustEmbedUnimplementedClientToServerServer()
+type UnsafeCCServiceServer interface {
+	mustEmbedUnimplementedCCServiceServer()
 }
 
-func RegisterClientToServerServer(s grpc.ServiceRegistrar, srv ClientToServerServer) {
-	s.RegisterService(&ClientToServer_ServiceDesc, srv)
+func RegisterCCServiceServer(s grpc.ServiceRegistrar, srv CCServiceServer) {
+	s.RegisterService(&CCService_ServiceDesc, srv)
 }
 
-func _ClientToServer_ParticipantMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CCService_ParticipantMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ClientInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ClientToServerServer).ParticipantMessages(ctx, in)
+		return srv.(CCServiceServer).ParticipantMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ClientToServer_ParticipantMessages_FullMethodName,
+		FullMethod: CCService_ParticipantMessages_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientToServerServer).ParticipantMessages(ctx, req.(*ClientInfo))
+		return srv.(CCServiceServer).ParticipantMessages(ctx, req.(*ClientInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ClientToServer_ParticipantJoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CCService_ParticipantJoins_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ClientInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ClientToServerServer).ParticipantJoins(ctx, in)
+		return srv.(CCServiceServer).ParticipantJoins(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ClientToServer_ParticipantJoins_FullMethodName,
+		FullMethod: CCService_ParticipantJoins_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientToServerServer).ParticipantJoins(ctx, req.(*ClientInfo))
+		return srv.(CCServiceServer).ParticipantJoins(ctx, req.(*ClientInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ClientToServer_ClientJoinReturn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClientInfo)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ClientToServerServer).ClientJoinReturn(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ClientToServer_ClientJoinReturn_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientToServerServer).ClientJoinReturn(ctx, req.(*ClientInfo))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// ClientToServer_ServiceDesc is the grpc.ServiceDesc for ClientToServer service.
+// CCService_ServiceDesc is the grpc.ServiceDesc for CCService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ClientToServer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.ClientToServer",
-	HandlerType: (*ClientToServerServer)(nil),
+var CCService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.CCService",
+	HandlerType: (*CCServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ParticipantMessages",
-			Handler:    _ClientToServer_ParticipantMessages_Handler,
+			Handler:    _CCService_ParticipantMessages_Handler,
 		},
 		{
 			MethodName: "ParticipantJoins",
-			Handler:    _ClientToServer_ParticipantJoins_Handler,
+			Handler:    _CCService_ParticipantJoins_Handler,
 		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "proto/proto.proto",
+}
+
+const (
+	ParticipantService_ClientJoinReturn_FullMethodName = "/proto.ParticipantService/ClientJoinReturn"
+)
+
+// ParticipantServiceClient is the client API for ParticipantService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ParticipantServiceClient interface {
+	ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
+}
+
+type participantServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewParticipantServiceClient(cc grpc.ClientConnInterface) ParticipantServiceClient {
+	return &participantServiceClient{cc}
+}
+
+func (c *participantServiceClient) ClientJoinReturn(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
+	out := new(ServerInfo)
+	err := c.cc.Invoke(ctx, ParticipantService_ClientJoinReturn_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ParticipantServiceServer is the server API for ParticipantService service.
+// All implementations must embed UnimplementedParticipantServiceServer
+// for forward compatibility
+type ParticipantServiceServer interface {
+	ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error)
+	mustEmbedUnimplementedParticipantServiceServer()
+}
+
+// UnimplementedParticipantServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedParticipantServiceServer struct {
+}
+
+func (UnimplementedParticipantServiceServer) ClientJoinReturn(context.Context, *ClientInfo) (*ServerInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClientJoinReturn not implemented")
+}
+func (UnimplementedParticipantServiceServer) mustEmbedUnimplementedParticipantServiceServer() {}
+
+// UnsafeParticipantServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ParticipantServiceServer will
+// result in compilation errors.
+type UnsafeParticipantServiceServer interface {
+	mustEmbedUnimplementedParticipantServiceServer()
+}
+
+func RegisterParticipantServiceServer(s grpc.ServiceRegistrar, srv ParticipantServiceServer) {
+	s.RegisterService(&ParticipantService_ServiceDesc, srv)
+}
+
+func _ParticipantService_ClientJoinReturn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClientInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ParticipantServiceServer).ClientJoinReturn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ParticipantService_ClientJoinReturn_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ParticipantServiceServer).ClientJoinReturn(ctx, req.(*ClientInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ParticipantService_ServiceDesc is the grpc.ServiceDesc for ParticipantService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ParticipantService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.ParticipantService",
+	HandlerType: (*ParticipantServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ClientJoinReturn",
-			Handler:    _ClientToServer_ClientJoinReturn_Handler,
+			Handler:    _ParticipantService_ClientJoinReturn_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

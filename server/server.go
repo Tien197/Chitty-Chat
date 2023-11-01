@@ -16,11 +16,11 @@ import (
 
 // Struct that will be used to represent the Server.
 type Server struct {
-	proto.UnimplementedClientToServerServer // Necessary
-	name                                    string
-	port                                    int
-	lamportTime                             int
-	participants                            []int
+	proto.UnimplementedCCServiceServer // Necessary
+	name                               string
+	port                               int
+	lamportTime                        int
+	participants                       []int
 }
 
 // Used to get the user-defined port for the server from the command line
@@ -57,6 +57,7 @@ func startServer(server *Server) {
 	grpcServer := grpc.NewServer()
 
 	// Make the server listen at the given port (convert int port to string)
+
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(server.port))
 
 	if err != nil {
@@ -65,7 +66,7 @@ func startServer(server *Server) {
 	log.Printf("Started %s at port: %d at Lamport time %d \n", server.name, server.port, server.lamportTime)
 
 	// Register the grpc server and serve its listener
-	proto.RegisterClientToServerServer(grpcServer, server)
+	proto.RegisterCCServiceServer(grpcServer, server)
 
 	serveError := grpcServer.Serve(listener)
 	if serveError != nil {
@@ -105,7 +106,7 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 			LamportTime: int64(s.lamportTime),
 		})
 		if err != nil {
-			return nil, err
+			log.Printf("%v", err)
 		}
 	}
 
@@ -114,11 +115,11 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	}, nil
 }
 
-func connectToClient(port int) (proto.ClientToServerClient, error) {
+func connectToClient(port int) (proto.ParticipantServiceClient, error) {
 	// Dial the server at the specified port.
 	conn, err := grpc.Dial("localhost:"+strconv.Itoa(port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Could not connect to port %d", port)
 	}
-	return proto.NewClientToServerClient(conn), nil
+	return proto.NewParticipantServiceClient(conn), nil
 }

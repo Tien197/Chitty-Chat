@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
@@ -16,10 +17,10 @@ import (
 )
 
 type Client struct {
-	proto.UnimplementedClientToServerServer // Necessary
-	id                                      int
-	portNumber                              int
-	lamportTime                             int
+	proto.UnimplementedParticipantServiceServer // Necessary
+	id                                          int
+	portNumber                                  int
+	lamportTime                                 int
 }
 
 var (
@@ -38,6 +39,8 @@ func main() {
 		portNumber:  *clientPort,
 		lamportTime: 1,
 	}
+	// Starts the client
+	go startClient(client)
 
 	// Wait for the client (user) to ask for the time
 	go waitForJoinRequest(client)
@@ -50,6 +53,26 @@ func main() {
 
 	log.Printf("Client %d disconnected from the server", client.id)
 
+}
+
+func startClient(client *Client) {
+
+	// Create a new grpc server
+	grpcServer := grpc.NewServer()
+
+	// Make the server listen at the given port (convert int port to string)
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(client.portNumber))
+
+	if err != nil {
+		log.Fatalf("Could not create the server %v", err)
+	}
+	// Register the grpc server and serve its listener
+	proto.RegisterParticipantServiceServer(grpcServer, client)
+
+	serveError := grpcServer.Serve(listener)
+	if serveError != nil {
+		log.Fatalf("Could not serve listener")
+	}
 }
 
 func waitForJoinRequest(client *Client) {
@@ -97,7 +120,7 @@ func waitForJoinRequest(client *Client) {
 	}
 }
 
-func connectToServer(client *Client) (proto.ClientToServerClient, error) {
+func connectToServer(client *Client) (proto.CCServiceClient, error) {
 	// Dial the server at the specified port.
 	conn, err := grpc.Dial("localhost:"+strconv.Itoa(*serverPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -105,7 +128,7 @@ func connectToServer(client *Client) (proto.ClientToServerClient, error) {
 	} else {
 		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
 	}
-	return proto.NewClientToServerClient(conn), nil
+	return proto.NewCCServiceClient(conn), nil
 }
 
 func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {

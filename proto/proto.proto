@@ -20,11 +20,16 @@ message ServerInfo { // server
   int64 lamportTime = 2;
 }
 
-service ClientToServer { // client sends message to server
+service CCService { // methods in server
   rpc ParticipantMessages(ClientInfo) returns (ServerInfo);
   rpc ParticipantJoins(ClientInfo) returns (ServerInfo);
+}
+
+service ParticipantService { // methods in client
   rpc ClientJoinReturn(ClientInfo) returns (ServerInfo);
 }
+
+
 /*service Join { // server sends message to all clients when a client joins
 }*/
 
