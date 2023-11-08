@@ -138,7 +138,7 @@ func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ClientInfo
 	}
 	client.lamportTime++
 
-	log.Printf("Client %d joined at lamport timestamp %d\n", client.id, client.lamportTime)
+	log.Printf("Client %d joined at lamport timestamp %d\n", in.ClientId, client.lamportTime)
 
 	return &proto.ServerInfo{
 		LamportTime: int64(client.lamportTime),
