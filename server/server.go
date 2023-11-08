@@ -92,22 +92,25 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	log.Printf("Participant %d joins %s at Lamport time %d\n", in.ClientId, s.name, s.lamportTime)
 
 	// Assuming that all clientIds are unique
-	s.participants = append(s.participants, int(in.ClientId))
+	s.participants = append(s.participants, int(in.PortNumber))
 
 	// need to be broadcast to all existing participants
-	for _, id := range s.participants {
-		clientConn, _ := connectToClient(int(in.PortNumber))
+	for _, port := range s.participants {
+
+		clientConn, _ := connectToClient(port)
+
 		s.lamportTime++
-		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, id, s.lamportTime)
+		log.Printf("%s broadcasts join message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
 
 		// send join message to participant
-		_, err := clientConn.ClientJoinReturn(context.Background(), &proto.ClientInfo{ // doesn't work
+		_, err := clientConn.ClientJoinReturn(context.Background(), &proto.ClientInfo{
 			ClientId:    in.ClientId,
 			LamportTime: int64(s.lamportTime),
 		})
 		if err != nil {
 			log.Printf("%v", err)
 		}
+
 	}
 
 	return &proto.ServerInfo{
