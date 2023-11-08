@@ -39,6 +39,9 @@ func main() {
 		portNumber:  *clientPort,
 		lamportTime: 1,
 	}
+
+	serverConnection, _ := connectToServer(client)
+
 	// Starts the client
 	go startClient(client)
 
@@ -53,6 +56,14 @@ func main() {
 
 	client.lamportTime++
 	log.Printf("Client %d disconnected from the server at Lamport time %d", client.id, client.lamportTime)
+
+	_, err := serverConnection.ParticipantLeaves(context.Background(), &proto.ClientInfo{
+		ClientId:    int64(client.id),
+		LamportTime: int64(client.lamportTime),
+	})
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 }
 
 func startClient(client *Client) {
@@ -77,7 +88,12 @@ func startClient(client *Client) {
 
 func waitForJoinRequest(client *Client) {
 	// Connect to the server
-	serverConnection, _ := connectToServer(client)
+	serverConnection, connectionErr := connectToServer(client)
+	if connectionErr != nil {
+		log.Fatalf("Could not connect to port %d", *serverPort)
+	} else {
+		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
+	}
 
 	client.lamportTime++
 	log.Printf("Client %d requests to join server at Lamport Time %d", client.id, client.lamportTime)
@@ -122,24 +138,32 @@ func waitForJoinRequest(client *Client) {
 
 func connectToServer(client *Client) (proto.CCServiceClient, error) {
 	// Dial the server at the specified port.
-	conn, err := grpc.Dial("localhost:"+strconv.Itoa(*serverPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Could not connect to port %d", *serverPort)
-	} else {
-		log.Printf("Client %d connected to the server at port %d at Lamport Time %d\n", client.id, *serverPort, client.lamportTime)
-	}
+	conn, _ := grpc.Dial("localhost:"+strconv.Itoa(*serverPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	return proto.NewCCServiceClient(conn), nil
 }
 
-// could be refactored
+// ClientJoinReturn could be refactored
 func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
-
 	if client.lamportTime < int(in.LamportTime) {
 		client.lamportTime = int(in.LamportTime)
 	}
 	client.lamportTime++
 
 	log.Printf("Client %d joined at lamport timestamp %d\n", in.ClientId, client.lamportTime)
+
+	return &proto.ServerInfo{
+		LamportTime: int64(client.lamportTime),
+	}, nil
+}
+
+// ClientLeavesReturn could be refactored
+func (client *Client) ClientLeavesReturn(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
+	if client.lamportTime < int(in.LamportTime) {
+		client.lamportTime = int(in.LamportTime)
+	}
+	client.lamportTime++
+
+	log.Printf("Client %d left at lamport timestamp %d\n", client.id, client.lamportTime)
 
 	return &proto.ServerInfo{
 		LamportTime: int64(client.lamportTime),

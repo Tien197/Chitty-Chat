@@ -28,6 +28,7 @@ service CCService { // methods in server
 
 service ParticipantService { // methods in client
   rpc ClientJoinReturn(ClientInfo) returns (ServerInfo);
+  rpc ClientLeavesReturn(ClientInfo) returns (ServerInfo);
 }
 
 

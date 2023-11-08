@@ -118,6 +118,42 @@ func (s *Server) ParticipantJoins(ctx context.Context, in *proto.ClientInfo) (*p
 	}, nil
 }
 
+// server broadcasts leave message to all participants
+func (s *Server) ParticipantLeaves(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
+	// updates lamport time depending on participant
+	if s.lamportTime < int(in.LamportTime) {
+		s.lamportTime = int(in.LamportTime)
+	}
+	s.lamportTime++
+	log.Printf("Participant %d left %s at Lamport time %d\n", in.ClientId, s.name, s.lamportTime)
+
+	// Assuming that all clientIds are unique
+	s.participants = append(s.participants, int(in.PortNumber))
+
+	// need to be broadcast to all existing participants
+	for _, port := range s.participants {
+
+		clientConn, _ := connectToClient(port)
+
+		s.lamportTime++
+		log.Printf("%s broadcasts leave message to Participant %d at Lamport time %d", s.name, in.ClientId, s.lamportTime)
+
+		// send join message to participant
+		_, err := clientConn.ClientLeavesReturn(context.Background(), &proto.ClientInfo{
+			ClientId:    in.ClientId,
+			LamportTime: int64(s.lamportTime),
+		})
+		if err != nil {
+			log.Printf("%v", err)
+		}
+
+	}
+
+	return &proto.ServerInfo{
+		LamportTime: int64(s.lamportTime),
+	}, nil
+}
+
 func connectToClient(port int) (proto.ParticipantServiceClient, error) {
 	// Dial the server at the specified port.
 	conn, err := grpc.Dial("localhost:"+strconv.Itoa(port), grpc.WithTransportCredentials(insecure.NewCredentials()))
