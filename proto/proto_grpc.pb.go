@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	CCService_ParticipantMessages_FullMethodName = "/proto.CCService/ParticipantMessages"
 	CCService_ParticipantJoins_FullMethodName    = "/proto.CCService/ParticipantJoins"
+	CCService_ParticipantLeaves_FullMethodName   = "/proto.CCService/ParticipantLeaves"
 )
 
 // CCServiceClient is the client API for CCService service.
@@ -29,6 +30,7 @@ const (
 type CCServiceClient interface {
 	ParticipantMessages(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 	ParticipantJoins(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
+	ParticipantLeaves(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error)
 }
 
 type cCServiceClient struct {
@@ -57,12 +59,22 @@ func (c *cCServiceClient) ParticipantJoins(ctx context.Context, in *ClientInfo, 
 	return out, nil
 }
 
+func (c *cCServiceClient) ParticipantLeaves(ctx context.Context, in *ClientInfo, opts ...grpc.CallOption) (*ServerInfo, error) {
+	out := new(ServerInfo)
+	err := c.cc.Invoke(ctx, CCService_ParticipantLeaves_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CCServiceServer is the server API for CCService service.
 // All implementations must embed UnimplementedCCServiceServer
 // for forward compatibility
 type CCServiceServer interface {
 	ParticipantMessages(context.Context, *ClientInfo) (*ServerInfo, error)
 	ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error)
+	ParticipantLeaves(context.Context, *ClientInfo) (*ServerInfo, error)
 	mustEmbedUnimplementedCCServiceServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedCCServiceServer) ParticipantMessages(context.Context, *Client
 }
 func (UnimplementedCCServiceServer) ParticipantJoins(context.Context, *ClientInfo) (*ServerInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParticipantJoins not implemented")
+}
+func (UnimplementedCCServiceServer) ParticipantLeaves(context.Context, *ClientInfo) (*ServerInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ParticipantLeaves not implemented")
 }
 func (UnimplementedCCServiceServer) mustEmbedUnimplementedCCServiceServer() {}
 
@@ -125,6 +140,24 @@ func _CCService_ParticipantJoins_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CCService_ParticipantLeaves_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClientInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CCServiceServer).ParticipantLeaves(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CCService_ParticipantLeaves_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CCServiceServer).ParticipantLeaves(ctx, req.(*ClientInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CCService_ServiceDesc is the grpc.ServiceDesc for CCService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var CCService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ParticipantJoins",
 			Handler:    _CCService_ParticipantJoins_Handler,
+		},
+		{
+			MethodName: "ParticipantLeaves",
+			Handler:    _CCService_ParticipantLeaves_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

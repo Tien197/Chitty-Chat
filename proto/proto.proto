@@ -23,6 +23,7 @@ message ServerInfo { // server
 service CCService { // methods in server
   rpc ParticipantMessages(ClientInfo) returns (ServerInfo);
   rpc ParticipantJoins(ClientInfo) returns (ServerInfo);
+  rpc ParticipantLeaves(ClientInfo) returns (ServerInfo);
 }
 
 service ParticipantService { // methods in client

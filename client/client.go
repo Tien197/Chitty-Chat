@@ -51,8 +51,8 @@ func main() {
 	// Block until a signal is received
 	<-sigChan
 
-	log.Printf("Client %d disconnected from the server", client.id)
-
+	client.lamportTime++
+	log.Printf("Client %d disconnected from the server at Lamport time %d", client.id, client.lamportTime)
 }
 
 func startClient(client *Client) {
@@ -131,6 +131,7 @@ func connectToServer(client *Client) (proto.CCServiceClient, error) {
 	return proto.NewCCServiceClient(conn), nil
 }
 
+// could be refactored
 func (client *Client) ClientJoinReturn(ctx context.Context, in *proto.ClientInfo) (*proto.ServerInfo, error) {
 
 	if client.lamportTime < int(in.LamportTime) {
